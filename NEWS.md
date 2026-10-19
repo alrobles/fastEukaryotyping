@@ -20,3 +20,5 @@
 - Added `inst/COPYRIGHTS` and `cran-comments.md`; `R CMD check --as-cran`
   reports 0 errors, 0 warnings and 2 expected notes (new submission,
   system compiler flag).
+- Original authors moved out of `Authors@R` pending their consent;
+  attribution retained in `inst/COPYRIGHTS` and the method citation.

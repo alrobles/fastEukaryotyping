@@ -2,7 +2,7 @@ Package: fastEukaryotyping
 Type: Package
 Title: Fast C++ Eukaryotyping MLST Distance Ensemble
 Version: 0.1.0
-Authors@R: c(
+Authors@R:
     person("Angel Luis", "Robles Fernandez",
            email = "a.l.robles.fernandez@gmail.com",
            role = c("aut", "cre"),

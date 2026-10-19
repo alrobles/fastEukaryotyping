@@ -22,9 +22,10 @@ requests `CXX_STD = CXX17` plus RcppParallel flags.
 ## Attribution
 
 This package is a reimplementation of algorithms from
-Joel-Barratt/Eukaryotyping (GPL >= 3). Original authors are credited as
-contributors in DESCRIPTION and `inst/COPYRIGHTS`; the method is cited via
-doi:10.1017/S0031182019000581.
+Joel-Barratt/Eukaryotyping (GPL >= 3). Provenance is documented in
+`inst/COPYRIGHTS` and the method is cited via doi:10.1017/S0031182019000581.
+The original authors have been notified and will be added to `Authors@R`
+only with their consent.
 
 ## Downstream dependencies
 
