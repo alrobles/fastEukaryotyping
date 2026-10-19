@@ -12,12 +12,12 @@ Source:
 
 Robles Fernandez A (2026). *fasteukaryotyping: Fast C++ Eukaryotyping
 MLST Distance Ensemble*. R package version 0.1.0,
-<https://alrobles.github.io/fasteukaryotyping/>.
+<https://alrobles.github.io/fastEukaryotyping/>.
 
     @Manual{,
       title = {fasteukaryotyping: Fast C++ Eukaryotyping MLST Distance Ensemble},
       author = {Angel Luis {Robles Fernandez}},
       year = {2026},
       note = {R package version 0.1.0},
-      url = {https://alrobles.github.io/fasteukaryotyping/},
+      url = {https://alrobles.github.io/fastEukaryotyping/},
     }

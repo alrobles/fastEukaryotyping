@@ -6,21 +6,21 @@
 - Pure-R reference implementation of `euk_heuristic_distance_r()`.
 - C++17/RcppParallel implementation of `euk_heuristic_distance_impl()`.
 - Added `impute_data` flag to
-  [`euk_heuristic_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_heuristic_distance.md)
+  [`euk_heuristic_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_heuristic_distance.md)
   and reference implementation.
 - Two-pass missing-locus imputation ported from
   `Joel-Barratt/Eukaryotyping`.
-- [`euk_heuristic_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_heuristic_distance.md)
+- [`euk_heuristic_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_heuristic_distance.md)
   matches the original Barratt heuristic output on the filtered
   68-sample HDS fixture (`barratt_expected.rds`) to within 1e-10.
 - Pure-R reference `euk_bayesian_distance_r()` porting Plucinski’s
   `euk_bayesian_fulldataset_V2.r`, including epsilon fallbacks and the
   multiset/unique-overlap pair semantics of the original.
 - C++17/RcppParallel implementation `euk_bayesian_distance_impl()`.
-- [`euk_bayesian_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_bayesian_distance.md)
+- [`euk_bayesian_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_bayesian_distance.md)
   matches the original script output on the same 68-sample fixture to
   within 1e-10 (R and C++ backends).
-- [`euk_ensemble_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_ensemble_distance.md):
+- [`euk_ensemble_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_ensemble_distance.md):
   rank-mapped mean of the heuristic and Bayesian matrices, per the
   original ensemble workflow.
 - Added `inst/COPYRIGHTS` and `cran-comments.md`;

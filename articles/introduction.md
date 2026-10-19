@@ -92,7 +92,7 @@ whether each locus is haploid (`1`) or diploid (`2`).
 MLST data is often stored as a *Haplotype Data Sheet* (HDS): a CSV with
 a `Seq_ID` column and one column per haplotype per locus, where presence
 is marked by `"X"`. Use
-[`euk_import_hds()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_import_hds.md)
+[`euk_import_hds()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_import_hds.md)
 to convert this format into the internal `geno` list:
 
 ``` r
@@ -148,4 +148,4 @@ system.time({
 ```
 
     ##    user  system elapsed 
-    ##       0       0       0
+    ##   0.001   0.000   0.000

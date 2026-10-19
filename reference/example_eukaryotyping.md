@@ -1,9 +1,9 @@
 # Example 8-locus haplotype data for fasteukaryotyping
 
 A small synthetic dataset used to test and demonstrate
-[`euk_heuristic_distance`](https://alrobles.github.io/fasteukaryotyping/reference/euk_heuristic_distance.md)
+[`euk_heuristic_distance`](https://alrobles.github.io/fastEukaryotyping/reference/euk_heuristic_distance.md)
 and
-[`euk_import_hds`](https://alrobles.github.io/fasteukaryotyping/reference/euk_import_hds.md).
+[`euk_import_hds`](https://alrobles.github.io/fastEukaryotyping/reference/euk_import_hds.md).
 
 ## Usage
 

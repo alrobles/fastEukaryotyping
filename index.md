@@ -10,13 +10,13 @@ into a CRAN-quality R package with Rcpp/RcppParallel backends.
 
 ## Functions
 
-- [`euk_heuristic_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_heuristic_distance.md)
+- [`euk_heuristic_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_heuristic_distance.md)
   — Barratt’s unsupervised heuristic mixture-model distance.
-- [`euk_bayesian_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_bayesian_distance.md)
+- [`euk_bayesian_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_bayesian_distance.md)
   — Plucinski’s naive Bayes genetic distance.
-- [`euk_ensemble_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_ensemble_distance.md)
+- [`euk_ensemble_distance()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_ensemble_distance.md)
   — Rank-mapped mean of the two matrices.
-- [`euk_import_hds()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_import_hds.md)
+- [`euk_import_hds()`](https://alrobles.github.io/fastEukaryotyping/reference/euk_import_hds.md)
   — Import a Haplotype Data Sheet (X-marked CSV) into the internal
   `geno` format.
 
