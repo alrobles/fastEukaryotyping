@@ -1,0 +1,8 @@
+useDynLib(fastEukaryotyping, .registration = TRUE)
+export(euk_import_hds)
+importFrom(Rcpp, sourceCpp)
+import(RcppParallel)
+importFrom(utils, combn)
+export(euk_heuristic_distance)
+export(euk_bayesian_distance)
+export(euk_ensemble_distance)

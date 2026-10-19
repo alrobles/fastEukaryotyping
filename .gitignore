@@ -1,0 +1,8 @@
+*.o
+*.so
+*.dll
+*.dylib
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata

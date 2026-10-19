@@ -1,0 +1,19 @@
+fastEukaryotyping is a reimplementation of the Eukaryotyping distance
+ensemble originally developed for Cyclospora cayetanensis MLST data.
+
+Original R implementation and algorithms:
+  Joel Barratt, Mateusz Plucinski, Felipe Nascimento and colleagues
+  CDC / Division of Parasitic Diseases and Malaria
+  Source: https://github.com/Joel-Barratt/Eukaryotyping
+
+Method publication:
+  Barratt JLN et al. (2019) "A Genotyping Approach to Determine the
+  Geographic Origin and Relatedness of Cyclospora cayetanensis"
+  Journal of Parasitology / Parasitology
+  doi:10.1017/S0031182019000581
+
+This package (C++17/Rcpp port, API design, validation):
+  Angel Luis Robles Fernandez <a.l.robles.fernandez@gmail.com>
+
+All code in this package is distributed under GPL (>= 3), consistent
+with the license of the original Eukaryotyping scripts.

@@ -1,0 +1,17 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^\.github$
+^\.git$
+^\.gitignore$
+^\.pre-commit-config\.yaml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^vignettes$
+^CRAN-SUBMISSION$
+^cran-comments\.md$
+^\.agents$
+^\.devin$
+^\.vscode$
+^data-raw$
