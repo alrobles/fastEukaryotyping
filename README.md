@@ -1,4 +1,4 @@
-# fastEukaryotyping
+# fasteukaryotyping
 
 Fast C++17 reimplementation of the **Eukaryotyping** ensemble for MLST haplotype data sheets.
 
@@ -6,28 +6,51 @@ This package migrates the original R scripts of Barratt, Plucinski and colleague
 (Barratt et al. 2019, *Parasitology*, [doi:10.1017/S0031182019000581](https://doi.org/10.1017/S0031182019000581))
 into a CRAN-quality R package with Rcpp/RcppParallel backends.
 
-## Features
+## Functions
 
 - `euk_heuristic_distance()` — Barratt's unsupervised heuristic mixture-model distance.
 - `euk_bayesian_distance()` — Plucinski's naive Bayes genetic distance.
 - `euk_ensemble_distance()` — Rank-mapped mean of the two matrices.
-- Handles missing data, heterozygosity, ploidy differences and mixed-genotype infections.
-- Pure-R reference implementations (`*_r`) are kept for cross-language testing.
+- `euk_import_hds()` — Import a Haplotype Data Sheet (X-marked CSV) into the internal `geno` format.
+
+Handles missing data, heterozygosity, ploidy differences and mixed-genotype infections.
 
 ## Installation
 
 ```r
-remotes::install_github("alrobles/fastEukaryotyping")
+remotes::install_github("alrobles/fasteukaryotyping")
 ```
+
+Or from CRAN once released.
 
 ## Usage
 
 ```r
-library(fastEukaryotyping)
+library(fasteukaryotyping)
 
 # geno is a list of n x maxMOI integer matrices; NA for empty slots
 # ploidy is an integer vector (1 = haploid, 2 = diploid) for each locus
 d <- euk_heuristic_distance(geno, ploidy)
+```
+
+### Quick start with the built-in example
+
+```r
+library(fasteukaryotyping)
+
+eg <- example_eukaryotyping
+D_h <- euk_heuristic_distance(eg$geno, eg$ploidy, ids = eg$ids)
+D_b <- euk_bayesian_distance(eg$geno, eg$ploidy, ids = eg$ids)
+D_e <- euk_ensemble_distance(eg$geno, eg$ploidy, ids = eg$ids)
+```
+
+### Import from a Haplotype Data Sheet
+
+```r
+hds <- read.csv("haplotypes.csv", stringsAsFactors = FALSE)
+out <- euk_import_hds(hds, locinames = c("locus1", "locus2"), ploidy = c(2L, 2L))
+geno <- attr(out, "geno")
+D <- euk_heuristic_distance(geno, ploidy = c(2L, 2L))
 ```
 
 ## Verification against the original Barratt script
@@ -38,27 +61,19 @@ The package ships a filtered HDS fixture taken from
 `tests/testthat/fixtures/barratt_expected.rds`.
 
 ```r
-library(fastEukaryotyping)
+library(fasteukaryotyping)
 
-geno   <- readRDS(system.file("testthat/fixtures", "barratt_geno.rds", package = "fastEukaryotyping"))
-ploidy <- readRDS(system.file("testthat/fixtures", "barratt_ploidy.rds", package = "fastEukaryotyping"))
-ids    <- readRDS(system.file("testthat/fixtures", "barratt_ids.rds", package = "fastEukaryotyping"))
-expected <- readRDS(system.file("testthat/fixtures", "barratt_expected.rds", package = "fastEukaryotyping"))
+geno   <- readRDS(system.file("testthat/fixtures", "barratt_geno.rds", package = "fasteukaryotyping"))
+ploidy <- readRDS(system.file("testthat/fixtures", "barratt_ploidy.rds", package = "fasteukaryotyping"))
+ids    <- readRDS(system.file("testthat/fixtures", "barratt_ids.rds", package = "fasteukaryotyping"))
+expected <- readRDS(system.file("testthat/fixtures", "barratt_expected.rds", package = "fasteukaryotyping"))
 
 D <- euk_heuristic_distance(geno, ploidy, ids = ids, impute_data = TRUE)
 all.equal(D, expected, tolerance = 1e-10)  # TRUE
 ```
 
-`R CMD check --as-cran` also runs `testthat::test()` which enforces this
+`R CMD check` also runs `testthat::test()` which enforces this
 identity for both the R reference and the C++ implementation.
-
-## Development
-
-The package follows the `_r` → `_cpp` migration pattern:
-
-1. `R/*_r.R` — base-R reference implementations.
-2. `src/*.cpp` — C++17/RcppParallel implementations.
-3. `tests/testthat/test-*-cpp-vs-r.R` — numerical parity tests.
 
 ## License
 

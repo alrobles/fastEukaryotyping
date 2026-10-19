@@ -1,4 +1,4 @@
-useDynLib(fastEukaryotyping, .registration = TRUE)
+useDynLib(fasteukaryotyping, .registration = TRUE)
 export(euk_import_hds)
 importFrom(Rcpp, sourceCpp)
 import(RcppParallel)

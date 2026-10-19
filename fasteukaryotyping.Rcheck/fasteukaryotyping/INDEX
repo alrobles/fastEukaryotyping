@@ -1,0 +1,13 @@
+.euk_bayesian_distance_impl
+                        Internal Bayesian distance (C++ implementation)
+.euk_heuristic_distance_impl
+                        Internal heuristic distance (C++
+                        implementation)
+euk_bayesian_distance   Bayesian Eukaryotyping distance
+euk_ensemble_distance   Eukaryotyping ensemble distance
+euk_heuristic_distance
+                        Heuristic Eukaryotyping distance
+euk_import_hds          Import a Haplotype Data Sheet (HDS) into the
+                        internal geno list
+example_eukaryotyping   Example 8-locus haplotype data for
+                        fasteukaryotyping

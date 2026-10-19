@@ -1,0 +1,25 @@
+#' Example 8-locus haplotype data for fasteukaryotyping
+#'
+#' A small synthetic dataset used to test and demonstrate
+#' \code{\link{euk_heuristic_distance}} and \code{\link{euk_import_hds}}.
+#'
+#' @format A named list with 5 elements:
+#' \describe{
+#'   \item{\code{geno}}{A list of 3 integer matrices (one per locus) with 12
+#'     rows (samples) and 1-2 columns (ploidy). Missing values are coded as
+#'     \code{NA}.}
+#'   \item{\code{ploidy}}{Integer vector of length 3 (c(2, 2, 1)).}
+#'   \item{\code{ids}}{Character vector of sample identifiers.}
+#'   \item{\code{D}}{The 12 x 12 heuristic distance matrix computed from
+#'     \code{euk_heuristic_distance_r}.}
+#'   \item{\code{hds}}{A data frame with an X-marked Haplotype Data Sheet
+#'     for \code{euk_import_hds}.}
+#' }
+#'
+#' @details
+#' The object was generated with \code{set.seed(42)} so that tests and
+#' examples are deterministic. Use \code{data(example_eukaryotyping)} to load
+#' the list into the working environment.
+#'
+#' @source Synthetic data created for the fasteukaryotyping test suite.
+"example_eukaryotyping"

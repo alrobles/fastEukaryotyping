@@ -309,9 +309,9 @@ static void impute_pass(const std::vector<LocusData>& loci,
   }
 }
 
-//' Internal C++ heuristic distance
+//' Internal heuristic distance (C++ implementation)
 //'
-//' RcppParallel reimplementation of \code{euk_heuristic_distance_r()}.
+//' RcppParallel reimplementation of \\code{euk_heuristic_distance_r()}.
 //' Each locus may have at most 64 distinct alleles.
 //'
 //' @param geno List of integer matrices.
@@ -320,8 +320,8 @@ static void impute_pass(const std::vector<LocusData>& loci,
 //' @param impute_data Integer (0/1). If 1, apply the two-pass Barratt
 //'   missing-locus imputation.
 //' @return A symmetric distance matrix.
-// [[Rcpp::export(.euk_heuristic_distance_cpp)]]
-NumericMatrix euk_heuristic_distance_cpp(List geno, IntegerVector ploidy, IntegerVector m, int impute_data) {
+// [[Rcpp::export(.euk_heuristic_distance_impl)]]
+NumericMatrix euk_heuristic_distance_impl(List geno, IntegerVector ploidy, IntegerVector m, int impute_data) {
   if (geno.size() == 0) {
     stop("'geno' must contain at least one locus.");
   }
@@ -602,7 +602,7 @@ struct BayesWorker : public Worker {
   }
 };
 
-//' Internal C++ Bayesian distance
+//' Internal Bayesian distance (C++ implementation)
 //'
 //' RcppParallel reimplementation of \code{euk_bayesian_distance_r()}
 //' (Plucinski's unsupervised naive Bayes classifier).
@@ -611,8 +611,8 @@ struct BayesWorker : public Worker {
 //' @param ploidy Integer vector of ploidy values.
 //' @param epsilon Rate of missed alleles.
 //' @return A symmetric distance matrix with values in \eqn{[0, 2]}.
-// [[Rcpp::export(.euk_bayesian_distance_cpp)]]
-NumericMatrix euk_bayesian_distance_cpp(List geno, IntegerVector ploidy, double epsilon) {
+// [[Rcpp::export(.euk_bayesian_distance_impl)]]
+NumericMatrix euk_bayesian_distance_impl(List geno, IntegerVector ploidy, double epsilon) {
   if (geno.size() == 0) {
     stop("'geno' must contain at least one locus.");
   }

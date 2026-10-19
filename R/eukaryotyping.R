@@ -93,8 +93,8 @@ euk_import_hds <- function(data, locinames, locinames_base = locinames,
 #' @param impute_data Logical. If `TRUE` (default), missing loci are imputed
 #'   with the two-pass Barratt mean procedure so that the returned matrix is
 #'   fully populated. If `FALSE`, pairs sharing a missing locus return `NA`.
-#' @param use_r Logical. If `TRUE` use the pure-R reference implementation;
-#'   if `FALSE` use the C++ implementation.
+#' @param use_r Logical. If `TRUE` use the pure-R reference implementation
+#'   (deprecated); if `FALSE` (default) use the optimised C++ implementation.
 #' @return An `n x n` numeric distance matrix.
 #' @export
 #' @examples
@@ -107,7 +107,7 @@ euk_import_hds <- function(data, locinames, locinames_base = locinames,
 #' d <- euk_heuristic_distance(geno, ploidy = c(2L, 2L))
 #'
 euk_heuristic_distance <- function(geno, ploidy, ids = NULL, m = rep(1L, length(geno)),
-                                   impute_data = TRUE, use_r = TRUE) {
+                                   impute_data = TRUE, use_r = FALSE) {
   checkmate::assert_list(geno, min.len = 1L)
   checkmate::assert_integerish(ploidy, len = length(geno))
   checkmate::assert_integerish(m, len = length(geno))
@@ -121,9 +121,10 @@ euk_heuristic_distance <- function(geno, ploidy, ids = NULL, m = rep(1L, length(
   }
 
   if (use_r) {
+    message("DeprecationWarning: use_r = TRUE is deprecated; the C++ backend is now the default.")
     D <- euk_heuristic_distance_r(geno, ploidy, m, impute_data)
   } else {
-    D <- .euk_heuristic_distance_cpp(geno, ploidy, as.integer(m), as.integer(impute_data))
+    D <- .euk_heuristic_distance_impl(geno, ploidy, as.integer(m), as.integer(impute_data))
   }
 
   if (!is.null(ids)) {
@@ -144,9 +145,9 @@ euk_heuristic_distance <- function(geno, ploidy, ids = NULL, m = rep(1L, length(
 #' @param ploidy Integer vector (1 = haploid, 2 = diploid) for each locus.
 #' @param ids Optional character vector of sample identifiers.
 #' @param epsilon Rate of missed alleles (default `0.3072`).
-#' @param use_r Logical. If `TRUE` use the pure-R reference implementation;
-#'   if `FALSE` use the C++ implementation.
-#' @return An `n x n` numeric distance matrix in \eqn{[0, 2]}.
+#' @param use_r Logical. If `TRUE` use the pure-R reference implementation
+#'   (deprecated); if `FALSE` (default) use the optimised C++ implementation.
+#' @return An `n x n` numeric distance matrix in \\eqn{[0, 2]}.
 #' @export
 #' @examples
 #' set.seed(42)
@@ -158,7 +159,7 @@ euk_heuristic_distance <- function(geno, ploidy, ids = NULL, m = rep(1L, length(
 #' d <- euk_bayesian_distance(geno, ploidy = c(2L, 2L))
 #'
 euk_bayesian_distance <- function(geno, ploidy, ids = NULL,
-                                  epsilon = 0.3072, use_r = TRUE) {
+                                  epsilon = 0.3072, use_r = FALSE) {
   checkmate::assert_list(geno, min.len = 1L)
   checkmate::assert_integerish(ploidy, len = length(geno))
   checkmate::assert_character(ids, len = nrow(geno[[1L]]), null.ok = TRUE)
@@ -171,9 +172,10 @@ euk_bayesian_distance <- function(geno, ploidy, ids = NULL,
   }
 
   if (use_r) {
+    message("DeprecationWarning: use_r = TRUE is deprecated; the C++ backend is now the default.")
     D <- euk_bayesian_distance_r(geno, ploidy, epsilon)
   } else {
-    D <- .euk_bayesian_distance_cpp(geno, ploidy, epsilon)
+    D <- .euk_bayesian_distance_impl(geno, ploidy, epsilon)
   }
 
   if (!is.null(ids)) {

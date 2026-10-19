@@ -9,7 +9,7 @@ euk_bayesian_distance(
   ploidy,
   ids = NULL,
   epsilon = 0.3072,
-  use_r = TRUE
+  use_r = FALSE
 )
 }
 \arguments{
@@ -22,11 +22,11 @@ empty slots.}
 
 \item{epsilon}{Rate of missed alleles (default `0.3072`).}
 
-\item{use_r}{Logical. If `TRUE` use the pure-R reference implementation;
-if `FALSE` use the C++ implementation.}
+\item{use_r}{Logical. If `TRUE` use the pure-R reference implementation
+(deprecated); if `FALSE` (default) use the optimised C++ implementation.}
 }
 \value{
-An `n x n` numeric distance matrix in \eqn{[0, 2]}.
+An `n x n` numeric distance matrix in \\eqn{[0, 2]}.
 }
 \description{
 Computes Plucinski's unsupervised naive-Bayes distance matrix for MLST
@@ -40,4 +40,5 @@ geno <- list(
   matrix(sample(c(1L, 2L, NA), n * 2, replace = TRUE), nrow = n, ncol = 2)
 )
 d <- euk_bayesian_distance(geno, ploidy = c(2L, 2L))
+
 }

@@ -16,7 +16,7 @@ euk_ensemble_distance(geno, ploidy, ids = NULL, epsilon = 0.3072, ...)
 \item{epsilon}{Rate of missed alleles for the Bayesian component.}
 
 \item{...}{Passed to [euk_heuristic_distance()] (e.g. `m`, `impute_data`,
-  `use_r`).}
+`use_r`).}
 }
 \value{
 An `n x n` matrix of mean fractional ranks in \eqn{[0, 1]}.

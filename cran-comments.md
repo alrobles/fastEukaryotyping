@@ -1,23 +1,14 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 note
 
 ## Notes explained
 
-### CRAN incoming feasibility
+### Rd file formatting
 
-- This is a **new submission** of a new package.
-- `URL`/`BugReports` point to `github.com/alrobles/fastEukaryotyping`, the
-  public release repository; it returns 404 until the repository is made
-  public at release time.
-- Version `0.0.0.9000` triggers the "large components" flag; it will be
-  bumped to `0.1.0` for the release tarball.
-
-### Compilation flag
-
-`-mno-omit-leaf-frame-pointer` is injected by this system's R Makeconf
-(R 4.5.2, Ubuntu 26.04), not by the package `Makevars`; the package only
-requests `CXX_STD = CXX17` plus RcppParallel flags.
+- Benign "Lost braces" note in `dot-euk_heuristic_distance_impl.Rd` and
+  `euk_bayesian_distance.Rd` (escaped backslashes inside Rd markup).
+  Cosmetic only; does not affect documentation rendering.
 
 ## Attribution
 
@@ -34,3 +25,8 @@ None (new submission).
 ## Test environments
 
 - Local: R 4.5.2, Ubuntu 26.04, gcc 15.2.0
+
+## History
+
+- 0.0.0.9000: Initial development submission
+- 0.1.0:    Release; C++ default, _r deprecated, vignettes, CRAN prep

@@ -1,5 +1,10 @@
 #' Eukaryotyping Bayesian distance --- pure R reference
 #'
+#' \strong{Deprecated:} use \code{\link{euk_bayesian_distance}} with
+#' \code{use_r = FALSE} (the default) for the optimised C++ implementation.
+#' This reference implementation is retained for cross-validation and
+#' development only.
+#'
 #' Faithful port of Plucinski's unsupervised naive Bayes distance
 #' (`euk_bayesian_fulldataset_V2.r` in `Joel-Barratt/Eukaryotyping`).
 #'
@@ -28,7 +33,10 @@
 #' @importFrom utils combn
 #' @keywords internal
 #' @noRd
+#' @deprecated Use \code{\link{euk_bayesian_distance}(..., use_r = FALSE)}
+#'   instead.
 euk_bayesian_distance_r <- function(geno, ploidy, epsilon = 0.3072) {
+  message("DeprecationWarning: euk_bayesian_distance_r is deprecated. Use euk_bayesian_distance(..., use_r = FALSE) instead.")
   nids <- nrow(geno[[1L]])
   nloci <- length(geno)
 
@@ -118,6 +126,10 @@ euk_bayesian_distance_r <- function(geno, ploidy, epsilon = 0.3072) {
 
 #' Eukaryotyping ensemble distance --- pure R reference
 #'
+#' \strong{Deprecated:} use \code{\link{euk_ensemble_distance}} which
+#' calls the C++ backends by default. This reference helper is retained
+#' for cross-validation and development only.
+#'
 #' Rank-mapped mean of the heuristic and Bayesian distance matrices: the
 #' pairwise distances of each method are converted to fractional ranks over
 #' the unique unordered pairs, and the ensemble entry is the mean of the two
@@ -129,7 +141,9 @@ euk_bayesian_distance_r <- function(geno, ploidy, epsilon = 0.3072) {
 #' @return `n x n` numeric matrix of mean fractional ranks in \eqn{[0, 1]}.
 #' @keywords internal
 #' @noRd
+#' @deprecated Use \code{\link{euk_ensemble_distance}} instead.
 euk_ensemble_distance_r <- function(D_heuristic, D_bayesian) {
+  message("DeprecationWarning: euk_ensemble_distance_r is deprecated. Use euk_ensemble_distance instead.")
   rank_upper <- function(D) {
     iu <- which(upper.tri(D), arr.ind = TRUE)
     r <- rank(D[iu], ties.method = "average", na.last = "keep")

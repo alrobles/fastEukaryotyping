@@ -1,4 +1,4 @@
 library(testthat)
-library(fastEukaryotyping)
+library(fasteukaryotyping)
 
-test_check("fastEukaryotyping")
+test_check("fasteukaryotyping")

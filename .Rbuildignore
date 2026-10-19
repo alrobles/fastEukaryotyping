@@ -11,6 +11,7 @@
 ^vignettes$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
+^LICENSE$
 ^\.agents$
 ^\.devin$
 ^\.vscode$

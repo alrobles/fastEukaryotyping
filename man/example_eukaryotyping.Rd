@@ -3,7 +3,7 @@
 \docType{data}
 \name{example_eukaryotyping}
 \alias{example_eukaryotyping}
-\title{Example 8-locus haplotype data for fastEukaryotyping}
+\title{Example 8-locus haplotype data for fasteukaryotyping}
 \format{
 A named list with 5 elements:
 \describe{
@@ -19,7 +19,7 @@ A named list with 5 elements:
 }
 }
 \source{
-Synthetic data created for the fastEukaryotyping test suite.
+Synthetic data created for the fasteukaryotyping test suite.
 }
 \usage{
 example_eukaryotyping

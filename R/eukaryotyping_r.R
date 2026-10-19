@@ -1,5 +1,10 @@
 #' Eukaryotyping heuristic distance --- pure R reference
 #'
+#' \strong{Deprecated:} use \code{\link{euk_heuristic_distance}} with
+#' \code{use_r = FALSE} (the default) for the optimised C++ implementation.
+#' This reference implementation is retained for cross-validation and
+#' development only.
+#'
 #' Internal reference implementation that mirrors the original
 #' `euk_heuristic_fulldataset.r` script line-by-line, including the
 #' two-pass missing-locus imputation.
@@ -17,9 +22,12 @@
 #' @importFrom utils combn
 #' @keywords internal
 #' @noRd
+#' @deprecated Use \code{\link{euk_heuristic_distance}(..., use_r = FALSE)}
+#'   instead.
 euk_heuristic_distance_r <- function(geno, ploidy,
                                      m = rep(1L, length(geno)),
                                      impute_data = FALSE) {
+  message("DeprecationWarning: euk_heuristic_distance_r is deprecated. Use euk_heuristic_distance(..., use_r = FALSE) instead.")
   nids <- nrow(geno[[1L]])
   nloci <- length(geno)
 

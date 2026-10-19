@@ -1,0 +1,7 @@
+.euk_bayesian_distance_impl	dot-euk_bayesian_distance_impl
+.euk_heuristic_distance_impl	dot-euk_heuristic_distance_impl
+euk_bayesian_distance	euk_bayesian_distance
+euk_ensemble_distance	euk_ensemble_distance
+euk_heuristic_distance	euk_heuristic_distance
+euk_import_hds	euk_import_hds
+example_eukaryotyping	example_eukaryotyping

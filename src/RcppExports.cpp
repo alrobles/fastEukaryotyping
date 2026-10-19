@@ -10,9 +10,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// euk_heuristic_distance_cpp
-NumericMatrix euk_heuristic_distance_cpp(List geno, IntegerVector ploidy, IntegerVector m, int impute_data);
-RcppExport SEXP _fastEukaryotyping_euk_heuristic_distance_cpp(SEXP genoSEXP, SEXP ploidySEXP, SEXP mSEXP, SEXP impute_dataSEXP) {
+// euk_heuristic_distance_impl
+NumericMatrix euk_heuristic_distance_impl(List geno, IntegerVector ploidy, IntegerVector m, int impute_data);
+RcppExport SEXP _fasteukaryotyping_euk_heuristic_distance_impl(SEXP genoSEXP, SEXP ploidySEXP, SEXP mSEXP, SEXP impute_dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,34 +20,31 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type m(mSEXP);
     Rcpp::traits::input_parameter< int >::type impute_data(impute_dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(euk_heuristic_distance_cpp(geno, ploidy, m, impute_data));
+    rcpp_result_gen = Rcpp::wrap(euk_heuristic_distance_impl(geno, ploidy, m, impute_data));
     return rcpp_result_gen;
 END_RCPP
 }
-
-// euk_bayesian_distance_cpp
-NumericMatrix euk_bayesian_distance_cpp(List geno, IntegerVector ploidy, double epsilon);
-RcppExport SEXP _fastEukaryotyping_euk_bayesian_distance_cpp(SEXP genoSEXP, SEXP ploidySEXP, SEXP epsilonSEXP) {
+// euk_bayesian_distance_impl
+NumericMatrix euk_bayesian_distance_impl(List geno, IntegerVector ploidy, double epsilon);
+RcppExport SEXP _fasteukaryotyping_euk_bayesian_distance_impl(SEXP genoSEXP, SEXP ploidySEXP, SEXP epsilonSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type geno(genoSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< double >::type epsilon(epsilonSEXP);
-    rcpp_result_gen = Rcpp::wrap(euk_bayesian_distance_cpp(geno, ploidy, epsilon));
+    rcpp_result_gen = Rcpp::wrap(euk_bayesian_distance_impl(geno, ploidy, epsilon));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fastEukaryotyping_euk_heuristic_distance_cpp", (DL_FUNC) &_fastEukaryotyping_euk_heuristic_distance_cpp, 4},
-    {"_fastEukaryotyping_euk_bayesian_distance_cpp", (DL_FUNC) &_fastEukaryotyping_euk_bayesian_distance_cpp, 3},
+    {"_fasteukaryotyping_euk_heuristic_distance_impl", (DL_FUNC) &_fasteukaryotyping_euk_heuristic_distance_impl, 4},
+    {"_fasteukaryotyping_euk_bayesian_distance_impl", (DL_FUNC) &_fasteukaryotyping_euk_bayesian_distance_impl, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_fastEukaryotyping(DllInfo *dll) {
+RcppExport void R_init_fasteukaryotyping(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
-
-

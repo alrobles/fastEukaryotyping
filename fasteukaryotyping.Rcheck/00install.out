@@ -1,0 +1,23 @@
+* installing *source* package ‘fasteukaryotyping’ ...
+** this is package ‘fasteukaryotyping’ version ‘0.1.0’
+** using staged installation
+** libs
+using C++ compiler: ‘g++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0’
+using C++17
+g++ -std=gnu++17 -I"/usr/share/R/include" -DNDEBUG  -I'/home/alrobles/R/x86_64-pc-linux-gnu-library/4.5/Rcpp/include' -I'/usr/local/lib/R/site-library/RcppParallel/include'     -fpic  -g -O2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -ffile-prefix-map=/build/r-base-gvLXiX/r-base-4.5.2=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -fdebug-prefix-map=/build/r-base-gvLXiX/r-base-4.5.2=/usr/src/r-base-4.5.2-1ubuntu2 -Wdate-time -D_FORTIFY_SOURCE=3   -c RcppExports.cpp -o RcppExports.o
+g++ -std=gnu++17 -I"/usr/share/R/include" -DNDEBUG  -I'/home/alrobles/R/x86_64-pc-linux-gnu-library/4.5/Rcpp/include' -I'/usr/local/lib/R/site-library/RcppParallel/include'     -fpic  -g -O2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -ffile-prefix-map=/build/r-base-gvLXiX/r-base-4.5.2=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -fdebug-prefix-map=/build/r-base-gvLXiX/r-base-4.5.2=/usr/src/r-base-4.5.2-1ubuntu2 -Wdate-time -D_FORTIFY_SOURCE=3   -c eukaryotyping.cpp -o eukaryotyping.o
+g++ -std=gnu++17 -shared -L/usr/lib/R/lib -Wl,-Bsymbolic-functions -Wl,--package-metadata=%7B%22type%22:%22deb%22%2C%22os%22:%22ubuntu%22%2C%22name%22:%22r-base%22%2C%22version%22:%224.5.2-1ubuntu2%22%2C%22architecture%22:%22amd64%22%7D -flto=auto -ffat-lto-objects -Wl,-z,relro -o fasteukaryotyping.so RcppExports.o eukaryotyping.o -L/usr/lib/R/lib -lR
+installing to /home/alrobles/GitHub/fastEukaryotyping/fasteukaryotyping.Rcheck/00LOCK-fasteukaryotyping/00new/fasteukaryotyping/libs
+** R
+** data
+*** moving datasets to lazyload DB
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (fasteukaryotyping)

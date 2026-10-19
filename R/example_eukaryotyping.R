@@ -1,4 +1,4 @@
-#' Example 8-locus haplotype data for fastEukaryotyping
+#' Example 8-locus haplotype data for fasteukaryotyping
 #'
 #' A small synthetic dataset used to test and demonstrate
 #' \code{\link{euk_heuristic_distance}} and \code{\link{euk_import_hds}}.
@@ -21,5 +21,5 @@
 #' examples are deterministic. Use \code{data(example_eukaryotyping)} to load
 #' the list into the working environment.
 #'
-#' @source Synthetic data created for the fastEukaryotyping test suite.
+#' @source Synthetic data created for the fasteukaryotyping test suite.
 "example_eukaryotyping"

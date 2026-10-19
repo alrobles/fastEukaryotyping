@@ -1,0 +1,9 @@
+url: https://alrobles.github.io/fasteukaryotyping/
+template:
+  bootstrap: 5
+  math-rendering: mathjax
+articles:
+- title: Articles
+  contents:
+  - introduction
+  - algorithm

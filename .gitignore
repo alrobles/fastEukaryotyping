@@ -1,8 +1,9 @@
-*.o
-*.so
-*.dll
-*.dylib
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+*.o
+*.so
+*.dll
+*.dylib
+docs/

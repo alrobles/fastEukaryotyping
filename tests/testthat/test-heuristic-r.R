@@ -1,7 +1,7 @@
 test_that("euk_heuristic_distance_r returns a symmetric non-negative matrix", {
   geno <- readRDS(test_path("fixtures", "geno_fixture.rds"))
   ploidy <- readRDS(test_path("fixtures", "ploidy_fixture.rds"))
-  D <- fastEukaryotyping:::euk_heuristic_distance_r(geno, ploidy, impute_data = TRUE)
+  D <- fasteukaryotyping:::euk_heuristic_distance_r(geno, ploidy, impute_data = TRUE)
 
   n <- nrow(geno[[1L]])
   expect_equal(dim(D), c(n, n))
@@ -25,7 +25,7 @@ test_that("euk_heuristic_distance agrees with stored fixture", {
 })
 
 test_that("euk_import_hds converts an X-marked HDS correctly", {
-  csv_path <- system.file("extdata", "example_hds.csv", package = "fastEukaryotyping")
+  csv_path <- system.file("extdata", "example_hds.csv", package = "fasteukaryotyping")
   df <- read.csv(csv_path, stringsAsFactors = FALSE)
   # Only one locus called "Hap" for this smoke test
   out <- euk_import_hds(df, locinames = "Hap", ploidy = 2L)

@@ -10,7 +10,7 @@ euk_heuristic_distance(
   ids = NULL,
   m = rep(1L, length(geno)),
   impute_data = TRUE,
-  use_r = TRUE
+  use_r = FALSE
 )
 }
 \arguments{
@@ -27,8 +27,8 @@ empty slots.}
 with the two-pass Barratt mean procedure so that the returned matrix is
 fully populated. If `FALSE`, pairs sharing a missing locus return `NA`.}
 
-\item{use_r}{Logical. If `TRUE` use the pure-R reference implementation;
-if `FALSE` use the C++ implementation.}
+\item{use_r}{Logical. If `TRUE` use the pure-R reference implementation
+(deprecated); if `FALSE` (default) use the optimised C++ implementation.}
 }
 \value{
 An `n x n` numeric distance matrix.

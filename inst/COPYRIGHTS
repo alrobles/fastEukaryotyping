@@ -1,4 +1,4 @@
-fastEukaryotyping is a reimplementation of the Eukaryotyping distance
+fasteukaryotyping is a reimplementation of the Eukaryotyping distance
 ensemble originally developed for Cyclospora cayetanensis MLST data.
 
 Original R implementation and algorithms:
