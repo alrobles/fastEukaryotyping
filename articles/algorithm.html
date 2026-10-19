@@ -70,10 +70,14 @@ Ecological Research, University of Kansas<br><small class="dont-index">Source: <
     
     
 <p>This vignette explains the three distance methods that make up the
-Eukaryotyping ensemble. The methods were first published by Barratt et
-al. (2019) (<a href="https://doi.org/10.1017/S0031182019000581" class="external-link">doi:10.1017/S0031182019000581</a>)
-for genotyping <em>Cyclospora cayetanensis</em> from MLST data, and are
-reimplemented here in C++17 with RcppParallel.</p>
+Eukaryotyping ensemble. The component methods (heuristic and Bayesian)
+are faithful reimplementations of the original R scripts from Barratt,
+Park, Nascimento et al. (2019; <a href="https://doi.org/10.1017/S0031182019000581" class="external-link">doi:10.1017/S0031182019000581</a>),
+verified to within <span class="math inline">\(10^{-10}\)</span> on a
+68-sample <em>C. cayetanensis</em> HDS fixture. The ensemble
+<code>"original"</code> mode reproduces the published <code>run.r</code>
+workflow verbatim; the <code>"rank"</code> mode is a package-specific
+variant.</p>
 <div class="section level2">
 <h2 id="notation">Notation<a class="anchor" aria-label="anchor" href="#notation"></a>
 </h2>
@@ -107,7 +111,10 @@ locus <span class="math inline">\(j\)</span>
 distance. For each pair of isolates <span class="math inline">\((i,
 k)\)</span> and each locus <span class="math inline">\(j\)</span>, a
 per-locus delta <span class="math inline">\(\delta_{ik}^{(j)}\)</span>
-is computed; the overall distance is the sum of per-locus deltas.</p>
+is computed; the overall distance is the sum of per-locus deltas. A
+contribution is missing (no comparable locus) when
+<strong>either</strong> isolate has no allele at that locus, not only
+when both lack it.</p>
 <div class="section level3">
 <h3 id="per-locus-delta">Per-locus delta<a class="anchor" aria-label="anchor" href="#per-locus-delta"></a>
 </h3>
@@ -151,27 +158,50 @@ P\)</span> otherwise, and <span class="math inline">\(\delta_{\text{raw}}\)</spa
 integer function of <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, <span class="math inline">\(n\)</span>, and <span class="math inline">\(m_j\)</span> that implements the original Barratt
 lookup table (see <code>src/eukaryotyping.cpp:sub_per_locus()</code> for
 the exact mapping).</p>
-<p>For <strong>haploid</strong> loci the expression simplifies to:</p>
+<p>For <strong>haploid</strong> loci the expression retains the same
+structure:</p>
 <p><span class="math display">\[
-\delta = H_{\nu j} \cdot 2x \cdot \mathbb{I}(y = 0) \cdot k
+\delta = H_{\nu j} \cdot \bigl(
+  \delta_{\text{ex,raw}} \cdot \mathbb{I}(\delta_{\text{ex,raw}} &gt; 0)
++
+  P \cdot \mathbb{I}(\delta_{\text{ex,raw}} = 0)
+\bigr) \cdot k
 \]</span></p>
-<p>with the same <span class="math inline">\(k\)</span> convention. The
-entropy <span class="math inline">\(H_{\nu j}\)</span> is the Shannon
-entropy of the empirical allele distribution:</p>
+<p>with <span class="math inline">\(\delta_{\text{ex,raw}} = 2x\)</span>
+when <span class="math inline">\(y = 0\)</span> and <span class="math inline">\(\delta_{\text{ex,raw}} = 0\)</span> otherwise.
+When <span class="math inline">\(y &gt; 0\)</span> the <span class="math inline">\(P\)</span> replacement term contributes <span class="math inline">\(H_{\nu j} \cdot P^2\)</span> — shared alleles do
+<strong>not</strong> give a zero contribution. The entropy <span class="math inline">\(H_{\nu j}\)</span> is the Shannon entropy of the
+empirical allele distribution:</p>
 <p><span class="math display">\[
 H_{\nu j} = -\sum_{a \in \mathcal{A}_j} p_{ja} \log_2 p_{ja}
 \]</span></p>
 </div>
 <div class="section level3">
+<h3 id="preprocessing-and-diagonal">Preprocessing and diagonal<a class="anchor" aria-label="anchor" href="#preprocessing-and-diagonal"></a>
+</h3>
+<p>The R reference (<code>euk_heuristic_distance_r</code>) and the C++
+implementation preprocess each locus by converting <code>0</code> to
+<code>NA</code> and replicating the single observed allele into both
+columns for diploid loci with MOI = 1. Donor matching during imputation
+compares the <strong>post-preprocessing</strong> empty-slot patterns, so
+two isolates that agree on their non-missing alleles but differ in
+whether a singleton diploid was replicated are not considered
+matches.</p>
+<p>Self-pairs (the diagonal) are computed through the full per-locus
+delta machinery and are <strong>not</strong> forced to zero — a
+heterozygous diploid individual has a non-zero within-sample
+distance.</p>
+</div>
+<div class="section level3">
 <h3 id="missing-locus-imputation">Missing-locus imputation<a class="anchor" aria-label="anchor" href="#missing-locus-imputation"></a>
 </h3>
-<p>A pair of isolates that share <strong>no comparable locus</strong>
-(both missing) cannot contribute to the sum. Barratt’s two-pass mean
-procedure fills these entries:</p>
+<p>Barratt’s two-pass mean procedure fills entries where a locus is
+missing for an isolate:</p>
 <ol style="list-style-type: decimal">
 <li>For each isolate with a missing locus, find all <em>complete</em>
-isolates whose allele sets match at every non-missing locus. Impute the
-missing-locus delta as the mean of those matched isolates’ deltas.</li>
+isolates whose post-preprocessing allele sets and fullness flags match
+at every non-missing locus. Impute the missing-locus delta as the mean
+of those matched isolates’ deltas.</li>
 <li>If no match exists, impute using the global mean of the locus.</li>
 <li>A second pass catches any rows that remain partially empty after the
 first pass, re-imputing against the first-pass results.</li>
@@ -187,7 +217,15 @@ D_{ik}^{(H)} = \sum_{j=1}^{L} \delta_{ik}^{(j)}
 <h2 id="bayesian-distance-euk_bayesian_distance">2. Bayesian distance (<code>euk_bayesian_distance</code>)<a class="anchor" aria-label="anchor" href="#bayesian-distance-euk_bayesian_distance"></a>
 </h2>
 <p>Plucinski’s naive-Bayes distance evaluates, for each pair <span class="math inline">\((i, k)\)</span>, three log-likelihoods per locus
-corresponding to three relatedness hypotheses.</p>
+corresponding to three relatedness hypotheses. If a pair has
+<strong>no</strong> comparable locus (each locus is unobserved for at
+least one member) the method skips all loci (via
+<code>colSums(..., na.rm = TRUE)</code>) and returns exactly <span class="math inline">\(1.0\)</span> — a uniform posterior — rather than
+imputing.</p>
+<p>The Bayesian functions do <strong>not</strong> preprocess by
+duplicating diploid singleton alleles (unlike the heuristic path), so an
+isolate with a single observed allele at a diploid locus contributes one
+allele instead of two.</p>
 <div class="section level3">
 <h3 id="per-locus-log-likelihoods">Per-locus log-likelihoods<a class="anchor" aria-label="anchor" href="#per-locus-log-likelihoods"></a>
 </h3>
@@ -216,26 +254,37 @@ v_{kjv}\)</span>, compute:</p>
 failure rate (default 0.3072, estimated by Joel Barratt in May 2019) and
 <span class="math inline">\(\min(p_{\text{obs}})\)</span> is the
 smallest frequency among the alleles carried by the pair.</p>
-<p><strong>Hypothesis 2 — share both alleles</strong> (diploid loci
-only):</p>
+<p><strong>Hypothesis 2 — share both alleles:</strong></p>
 <p>Both isolates share a pair of alleles (multiset equality). For every
 pair of 2-subsets <span class="math inline">\((\mathbf{a},
-\mathbf{b})\)</span> of <span class="math inline">\(\mathbf{v}_{ij}\)</span> and <span class="math inline">\(\mathbf{v}_{kj}\)</span> that are equal as
+\mathbf{b})\)</span> from <span class="math inline">\(\mathbf{v}_{ij}\)</span> and <span class="math inline">\(\mathbf{v}_{kj}\)</span> that are equal as
 multisets:</p>
 <p><span class="math display">\[
 \ell_{2,\mathbf{a}\mathbf{b}} =
-  \bigl(\ell_0 - \log p_{j,a_1} - \log p_{j,a_2}\bigr) +
+  \sum_{a \in \mathbf{v}_{ij} \setminus \mathbf{a}} \log p_{ja} +
   \sum_{a \in \mathbf{v}_{kj}} \log p_{ja}
 \]</span></p>
-<p>and <span class="math inline">\(\ell_2 = \max
-\ell_{2,\mathbf{a}\mathbf{b}}\)</span>. If no multiset equality
-exists:</p>
+<p>which is equivalent to <span class="math inline">\(\ell_0\)</span>
+with the log-frequencies of the <strong>removed</strong> pair elements
+subtracted (the original R code uses <code><a href="https://rdrr.io/r/base/match.html" class="external-link">match()</a></code> to locate the
+first-position index of each pair value, then removes those indices via
+negative indexing). Let</p>
+<p><span class="math display">\[
+n_{\text{shared}} = \max_{\mathbf{a},\mathbf{b}}
+  \bigl|\operatorname{intersect}(\mathbf{a}, \mathbf{b})\bigr|
+\]</span></p>
+<p>be the maximum distinct-allele overlap over all 2-subset
+combinations.</p>
+<p>If a multiset equality is found, <span class="math inline">\(\ell_2 =
+\max \ell_{2,\mathbf{a}\mathbf{b}}\)</span>. Otherwise:</p>
 <p><span class="math display">\[
 \ell_2 = \log\bigl[(\epsilon \cdot \min(p_{\text{obs}}))^{2 -
 n_{\text{shared}}}\bigr]
 \]</span></p>
-<p>where <span class="math inline">\(n_{\text{shared}}\)</span> is the
-number of distinct allele values shared by the two subsets.</p>
+<p>For ploidy 1 loci, and when <strong>either</strong> allele vector has
+length 1, the package sets <span class="math inline">\(\ell_2 =
+\ell_1\)</span> (a package-level decision — the original script crashes
+on these cases).</p>
 </div>
 <div class="section level3">
 <h3 id="posterior-and-distance">Posterior and distance<a class="anchor" aria-label="anchor" href="#posterior-and-distance"></a>
@@ -259,38 +308,99 @@ D_{ik}^{(B)} = 0 \cdot \Pr(0) + 1 \cdot \Pr(1) + 2 \cdot \Pr(2)
 \in [0, 2]
 \]</span></p>
 <p>Values near 0 indicate the pair appears unrelated; values near 2
-suggest complete allelic sharing.</p>
+suggest complete allelic sharing. Self-pair diagonals range
+approximately <span class="math inline">\(1.46\)</span>–<span class="math inline">\(2.0\)</span> (a homozygous diploid with common
+alleles scores near 2; a singleton diploid with a rare allele scores
+lower).</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="ensemble-distance-euk_ensemble_distance">3. Ensemble distance (<code>euk_ensemble_distance</code>)<a class="anchor" aria-label="anchor" href="#ensemble-distance-euk_ensemble_distance"></a>
 </h2>
 <p>The heuristic and Bayesian distances operate on different scales and
-have different sensitivities. The ensemble combines them via
-<strong>fractional rank averaging</strong>, a copula-style summary that
-is invariant to monotone transformations of either distance.</p>
-<p>For an <span class="math inline">\(n \times n\)</span> distance
-matrix <span class="math inline">\(D\)</span>, let <span class="math inline">\(U\)</span> be the set of <span class="math inline">\(\binom{n}{2}\)</span> unordered upper-triangular
-entries. Assign fractional ranks:</p>
-<p><span class="math display">\[
+have different sensitivities. The ensemble combines them via one of two
+methods chosen with the <code>method</code> argument.</p>
+<div class="section level3">
+<h3 id="method-original-default">
+<code>method = "original"</code> (default)<a class="anchor" aria-label="anchor" href="#method-original-default"></a>
+</h3>
+<p>Reproduces the published <code>run.r</code> workflow verbatim:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Reverse</strong> the Bayesian direction: <span class="math inline">\(D_B' = 2 - D_B\)</span> so that both matrices
+are divergence-oriented (larger = more dissimilar).</li>
+<li>
+<strong>Min-max normalise</strong> each matrix over
+<strong>all</strong> entries (diagonal, upper and lower triangles
+together) to <span class="math inline">\([0, 1]\)</span>.</li>
+<li>Let <span class="math inline">\(H\)</span> be the normalised
+heuristic and <span class="math inline">\(B\)</span> the reversed-
+normalised Bayesian matrix. Sort <span class="math inline">\(B\)</span>’s values and map them onto the
+rank-order of <span class="math inline">\(H\)</span>: <span class="math display">\[
+D_{ik}^{(E)} = B_{(\text{rank}(H_{ik}))}
+\]</span> where ties in <span class="math inline">\(H\)</span> are
+broken <strong>randomly</strong> (<code>ties.method = "random"</code>),
+making the output <strong>non-deterministic</strong> unless a
+<code>seed</code> is provided.</li>
+<li>Take the elementwise mean of the distribution-mapped matrix and
+<span class="math inline">\(H\)</span>, then rescale by the global
+maximum.</li>
+</ol>
+<p>Because ties in the heuristic ranking are resolved at random, two
+calls with the same data can produce different matrices. The output
+matrix can also be <strong>asymmetric</strong> (the random tie-breaking
+and the full-matrix (non-triangular) sorting do not guarantee
+symmetry).</p>
+</div>
+<div class="section level3">
+<h3 id="method-rank">
+<code>method = "rank"</code><a class="anchor" aria-label="anchor" href="#method-rank"></a>
+</h3>
+<p>A package-specific variant that avoids random tie-breaking and
+preserves symmetry:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Reverse</strong> the Bayesian direction: <span class="math inline">\(D_B' = 2 - D_B\)</span>, so both matrices are
+divergence-oriented.</li>
+<li>For an <span class="math inline">\(n \times n\)</span> distance
+matrix <span class="math inline">\(D\)</span>, let <span class="math inline">\(U\)</span> be the set of <span class="math inline">\(\binom{n}{2}\)</span> strictly upper-triangular
+entries. Assign fractional ranks: <span class="math display">\[
 r(D)_{ik} = \frac{\text{rank of } D_{ik} \text{ among } U}
-                 {|U| + 1}
-\]</span></p>
-<p>so that <span class="math inline">\(r(D)_{ik} \in (0, 1)\)</span>.
-The ensemble entry is:</p>
-<p><span class="math display">\[
-D_{ik}^{(E)} = \frac{r\bigl(D^{(H)}\bigr)_{ik} +
-                    r\bigl(D^{(B)}\bigr)_{ik}}{2}
-\]</span></p>
-<p>Values near 0 indicate both methods agree on high similarity; values
-near 1 indicate strong divergence.</p>
+                 {\binom{n}{2} + 1}
+\]</span> with ties resolved by <code>ties.method = "average"</code>.
+The diagonal is set to <code>NA</code>.</li>
+<li>The ensemble entry is: <span class="math display">\[
+D_{ik}^{(E)} = \frac{r(D_H)_{ik} + r(D_B')_{ik}}{2}
+\]</span>
+</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="interpretation">Interpretation<a class="anchor" aria-label="anchor" href="#interpretation"></a>
+</h3>
+<p>After reversal both components are divergence-oriented:</p>
+<ul>
+<li>Values near <strong>0</strong> indicate both methods agree on high
+similarity (low divergence).</li>
+<li>Values near <strong>1</strong> indicate agreement on strong
+divergence.</li>
+</ul>
+<p>For the <code>"rank"</code> method the output lies in <span class="math inline">\((0, 1)\)</span>; for <code>"original"</code> the
+range depends on the global min-max scaling. The <code>"rank"</code>
+method is a package variant and is <strong>not</strong> described in the
+original publication.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p>Barratt JLN, Plucinski M, Nascimento F, et al. (2019) “A Genotyping
-Approach to Determine the Geographic Origin and Relatedness of
-Cyclospora cayetanensis” <em>Parasitology</em>, <a href="doi:10.1017/S0031182019000581" class="uri">doi:10.1017/S0031182019000581</a>.</p>
+<p>Barratt JLN, Park S, Nascimento FS, et al. (2019) “Genotyping
+genetically heterogeneous <em>Cyclospora cayetanensis</em> infections to
+complement epidemiological case linkage”. <em>Parasitology</em>
+<strong>146</strong>:1275–1283. <a href="doi:10.1017/S0031182019000581" class="uri">doi:10.1017/S0031182019000581</a>.</p>
+<p>Component distances (heuristic and Bayesian) verified against the
+original R scripts to within <span class="math inline">\(10^{-10}\)</span> on a 68-sample fixture. The
+ensemble <code>"rank"</code> method is a package-level extension.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
