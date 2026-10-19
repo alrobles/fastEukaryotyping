@@ -6,13 +6,7 @@ Authors@R: c(
     person("Angel Luis", "Robles Fernandez",
            email = "a.l.robles.fernandez@gmail.com",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-4674-4270")),
-    person("Joel", "Barratt", role = "ctb",
-           comment = "Original heuristic distance algorithm"),
-    person("Mateusz", "Plucinski", role = "ctb",
-           comment = "Original Bayesian distance algorithm"),
-    person("Felipe", "Nascimento", role = "ctb",
-           comment = "Original ensemble implementation"))
+           comment = c(ORCID = "0000-0002-4674-4270"))
 Description: Fast C++17/Rcpp reimplementation of the Eukaryotyping
     ensemble (Bayesian and heuristic genetic distances) for MLST haplotype
     data sheets. Handles missing data, heterozygosity and mixed-genotype
