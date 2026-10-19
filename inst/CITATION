@@ -5,5 +5,5 @@ bibentry(
                     email = "a.l.robles.fernandez@gmail.com"),
   year     = "2026",
   note     = "R package version 0.1.0",
-  url      = "https://alrobles.github.io/fasteukaryotyping/"
+  url      = "https://alrobles.github.io/fastEukaryotyping/"
 )
