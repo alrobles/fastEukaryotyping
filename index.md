@@ -1,0 +1,94 @@
+# fasteukaryotyping
+
+Fast C++17 reimplementation of the **Eukaryotyping** ensemble for MLST
+haplotype data sheets.
+
+This package migrates the original R scripts of Barratt, Plucinski and
+colleagues (Barratt et al. 2019, *Parasitology*,
+[doi:10.1017/S0031182019000581](https://doi.org/10.1017/S0031182019000581))
+into a CRAN-quality R package with Rcpp/RcppParallel backends.
+
+## Functions
+
+- [`euk_heuristic_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_heuristic_distance.md)
+  — Barratt’s unsupervised heuristic mixture-model distance.
+- [`euk_bayesian_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_bayesian_distance.md)
+  — Plucinski’s naive Bayes genetic distance.
+- [`euk_ensemble_distance()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_ensemble_distance.md)
+  — Rank-mapped mean of the two matrices.
+- [`euk_import_hds()`](https://alrobles.github.io/fasteukaryotyping/reference/euk_import_hds.md)
+  — Import a Haplotype Data Sheet (X-marked CSV) into the internal
+  `geno` format.
+
+Handles missing data, heterozygosity, ploidy differences and
+mixed-genotype infections.
+
+## Installation
+
+``` r
+
+remotes::install_github("alrobles/fasteukaryotyping")
+```
+
+Or from CRAN once released.
+
+## Usage
+
+``` r
+
+library(fasteukaryotyping)
+
+# geno is a list of n x maxMOI integer matrices; NA for empty slots
+# ploidy is an integer vector (1 = haploid, 2 = diploid) for each locus
+d <- euk_heuristic_distance(geno, ploidy)
+```
+
+### Quick start with the built-in example
+
+``` r
+
+library(fasteukaryotyping)
+
+eg <- example_eukaryotyping
+D_h <- euk_heuristic_distance(eg$geno, eg$ploidy, ids = eg$ids)
+D_b <- euk_bayesian_distance(eg$geno, eg$ploidy, ids = eg$ids)
+D_e <- euk_ensemble_distance(eg$geno, eg$ploidy, ids = eg$ids)
+```
+
+### Import from a Haplotype Data Sheet
+
+``` r
+
+hds <- read.csv("haplotypes.csv", stringsAsFactors = FALSE)
+out <- euk_import_hds(hds, locinames = c("locus1", "locus2"), ploidy = c(2L, 2L))
+geno <- attr(out, "geno")
+D <- euk_heuristic_distance(geno, ploidy = c(2L, 2L))
+```
+
+## Verification against the original Barratt script
+
+The package ships a filtered HDS fixture taken from
+`Joel-Barratt/Eukaryotyping` (68 samples, 14 loci) and the original
+`Heuristic_pairwisedistancematrix` saved as
+`tests/testthat/fixtures/barratt_expected.rds`.
+
+``` r
+
+library(fasteukaryotyping)
+
+geno   <- readRDS(system.file("testthat/fixtures", "barratt_geno.rds", package = "fasteukaryotyping"))
+ploidy <- readRDS(system.file("testthat/fixtures", "barratt_ploidy.rds", package = "fasteukaryotyping"))
+ids    <- readRDS(system.file("testthat/fixtures", "barratt_ids.rds", package = "fasteukaryotyping"))
+expected <- readRDS(system.file("testthat/fixtures", "barratt_expected.rds", package = "fasteukaryotyping"))
+
+D <- euk_heuristic_distance(geno, ploidy, ids = ids, impute_data = TRUE)
+all.equal(D, expected, tolerance = 1e-10)  # TRUE
+```
+
+`R CMD check` also runs `testthat::test()` which enforces this identity
+for both the R reference and the C++ implementation.
+
+## License
+
+GPL (\>= 3). Original Eukaryotyping scripts are credited in
+`DESCRIPTION`.

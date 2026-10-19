@@ -1,0 +1,10 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  algorithm: algorithm.html
+  introduction: introduction.html
+last_built: 2026-10-19T04:37Z
+urls:
+  reference: https://alrobles.github.io/fasteukaryotyping/reference
+  article: https://alrobles.github.io/fasteukaryotyping/articles
