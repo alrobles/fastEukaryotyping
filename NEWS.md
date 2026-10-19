@@ -1,6 +1,6 @@
 # fastEukaryotyping
 
-## fastEukaryotyping 0.1.0 ($today)
+## fastEukaryotyping 0.1.0 (2026-10-18)
 
 - Initial package skeleton.
 - Pure-R reference implementation of `euk_heuristic_distance_r()`.
