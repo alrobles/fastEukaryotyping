@@ -22,11 +22,14 @@ knitr::opts_chunk$set(
 ```
 
 This vignette explains the three distance methods that make up the
-Eukaryotyping ensemble.  The methods were first published by
-Barratt et al. (2019)
-([doi:10.1017/S0031182019000581](https://doi.org/10.1017/S0031182019000581))
-for genotyping *Cyclospora cayetanensis* from MLST data, and are
-reimplemented here in C++17 with RcppParallel.
+Eukaryotyping ensemble.  The component methods (heuristic and
+Bayesian) are faithful reimplementations of the original R scripts
+from Barratt, Park, Nascimento et al.
+(2019; [doi:10.1017/S0031182019000581](https://doi.org/10.1017/S0031182019000581)),
+verified to within $10^{-10}$ on a 68-sample *C. cayetanensis* HDS
+fixture.  The ensemble `"original"` mode reproduces the published
+`run.r` workflow verbatim; the `"rank"` mode is a package-specific
+variant.
 
 ## Notation
 
@@ -46,8 +49,10 @@ Let:
 
 The heuristic distance is Barratt's unsupervised mixture-model
 distance.  For each pair of isolates $(i, k)$ and each locus $j$, a
-per-locus delta $\delta_{ik}^{(j)}$ is computed; the overall
-distance is the sum of per-locus deltas.
+per-locus delta $\delta_{ik}^{(j)}$ is computed; the overall distance
+is the sum of per-locus deltas.  A contribution is missing (no
+comparable locus) when **either** isolate has no allele at that locus,
+not only when both lack it.
 
 ### Per-locus delta
 
@@ -87,28 +92,48 @@ $\delta_{\text{raw}}$ is a piecewise integer function of $x$, $y$,
 $n$, and $m_j$ that implements the original Barratt lookup table
 (see `src/eukaryotyping.cpp:sub_per_locus()` for the exact mapping).
 
-For **haploid** loci the expression simplifies to:
+For **haploid** loci the expression retains the same structure:
 
 $$
-\delta = H_{\nu j} \cdot 2x \cdot \mathbb{I}(y = 0) \cdot k
+\delta = H_{\nu j} \cdot \bigl(
+  \delta_{\text{ex,raw}} \cdot \mathbb{I}(\delta_{\text{ex,raw}} > 0) +
+  P \cdot \mathbb{I}(\delta_{\text{ex,raw}} = 0)
+\bigr) \cdot k
 $$
 
-with the same $k$ convention.  The entropy $H_{\nu j}$ is the
+with $\delta_{\text{ex,raw}} = 2x$ when $y = 0$ and
+$\delta_{\text{ex,raw}} = 0$ otherwise.  When $y > 0$ the $P$
+replacement term contributes $H_{\nu j} \cdot P^2$ — shared alleles
+do **not** give a zero contribution.  The entropy $H_{\nu j}$ is the
 Shannon entropy of the empirical allele distribution:
 
 $$
 H_{\nu j} = -\sum_{a \in \mathcal{A}_j} p_{ja} \log_2 p_{ja}
 $$
 
+### Preprocessing and diagonal
+
+The R reference (`euk_heuristic_distance_r`) and the C++
+implementation preprocess each locus by converting `0` to `NA` and
+replicating the single observed allele into both columns for diploid
+loci with MOI = 1.  Donor matching during imputation compares the
+**post-preprocessing** empty-slot patterns, so two isolates that agree
+on their non-missing alleles but differ in whether a singleton diploid
+was replicated are not considered matches.
+
+Self-pairs (the diagonal) are computed through the full per-locus
+delta machinery and are **not** forced to zero — a heterozygous
+diploid individual has a non-zero within-sample distance.
+
 ### Missing-locus imputation
 
-A pair of isolates that share **no comparable locus** (both missing)
-cannot contribute to the sum.  Barratt's two-pass mean procedure
-fills these entries:
+Barratt's two-pass mean procedure fills entries where a locus is
+missing for an isolate:
 
 1. For each isolate with a missing locus, find all *complete* isolates
-   whose allele sets match at every non-missing locus.  Impute the
-   missing-locus delta as the mean of those matched isolates' deltas.
+   whose post-preprocessing allele sets and fullness flags match at
+   every non-missing locus.  Impute the missing-locus delta as the
+   mean of those matched isolates' deltas.
 2. If no match exists, impute using the global mean of the locus.
 3. A second pass catches any rows that remain partially empty after
    the first pass, re-imputing against the first-pass results.
@@ -123,7 +148,15 @@ $$
 
 Plucinski's naive-Bayes distance evaluates, for each pair $(i, k)$,
 three log-likelihoods per locus corresponding to three relatedness
-hypotheses.
+hypotheses.  If a pair has **no** comparable locus (each locus is
+unobserved for at least one member) the method skips all loci
+(via `colSums(..., na.rm = TRUE)`) and returns exactly $1.0$ — a
+uniform posterior — rather than imputing.
+
+The Bayesian functions do **not** preprocess by duplicating diploid
+singleton alleles (unlike the heuristic path), so an isolate with a
+single observed allele at a diploid locus contributes one allele
+instead of two.
 
 ### Per-locus log-likelihoods
 
@@ -155,30 +188,44 @@ $$
 and take $\ell_1 = \max_{uv} \ell_{1,uv}$.  If no shared allele
 exists, $\ell_1 = \log(\epsilon \cdot \min(p_{\text{obs}}))$, where
 $\epsilon$ is the estimated allele-capture failure rate (default
-0.3072, estimated by Joel Barratt in May 2019) and $\min(p_{\text{obs}})$
-is the smallest frequency among the alleles carried by the pair.
+0.3072, estimated by Joel Barratt in May 2019) and
+$\min(p_{\text{obs}})$ is the smallest frequency among the alleles
+carried by the pair.
 
-**Hypothesis 2 — share both alleles** (diploid loci only):
+**Hypothesis 2 — share both alleles:**
 
 Both isolates share a pair of alleles (multiset equality).  For every
-pair of 2-subsets $(\mathbf{a}, \mathbf{b})$ of
+pair of 2-subsets $(\mathbf{a}, \mathbf{b})$ from
 $\mathbf{v}_{ij}$ and $\mathbf{v}_{kj}$ that are equal as multisets:
 
 $$
 \ell_{2,\mathbf{a}\mathbf{b}} =
-  \bigl(\ell_0 - \log p_{j,a_1} - \log p_{j,a_2}\bigr) +
+  \sum_{a \in \mathbf{v}_{ij} \setminus \mathbf{a}} \log p_{ja} +
   \sum_{a \in \mathbf{v}_{kj}} \log p_{ja}
 $$
 
-and $\ell_2 = \max \ell_{2,\mathbf{a}\mathbf{b}}$.  If no multiset
-equality exists:
+which is equivalent to $\ell_0$ with the log-frequencies of the
+**removed** pair elements subtracted (the original R code uses
+`match()` to locate the first-position index of each pair value,
+then removes those indices via negative indexing).  Let
+
+$$
+n_{\text{shared}} = \max_{\mathbf{a},\mathbf{b}}
+  \bigl|\operatorname{intersect}(\mathbf{a}, \mathbf{b})\bigr|
+$$
+
+be the maximum distinct-allele overlap over all 2-subset combinations.
+
+If a multiset equality is found, $\ell_2 = \max \ell_{2,\mathbf{a}\mathbf{b}}$.
+Otherwise:
 
 $$
 \ell_2 = \log\bigl[(\epsilon \cdot \min(p_{\text{obs}}))^{2 - n_{\text{shared}}}\bigr]
 $$
 
-where $n_{\text{shared}}$ is the number of distinct allele values
-shared by the two subsets.
+For ploidy 1 loci, and when **either** allele vector has length 1,
+the package sets $\ell_2 = \ell_1$ (a package-level decision — the
+original script crashes on these cases).
 
 ### Posterior and distance
 
@@ -206,37 +253,82 @@ D_{ik}^{(B)} = 0 \cdot \Pr(0) + 1 \cdot \Pr(1) + 2 \cdot \Pr(2)
 $$
 
 Values near 0 indicate the pair appears unrelated; values near 2
-suggest complete allelic sharing.
+suggest complete allelic sharing.  Self-pair diagonals range
+approximately $1.46$--$2.0$ (a homozygous diploid with common alleles
+scores near 2; a singleton diploid with a rare allele scores lower).
 
 ## 3. Ensemble distance (`euk_ensemble_distance`)
 
 The heuristic and Bayesian distances operate on different scales and
-have different sensitivities.  The ensemble combines them via
-**fractional rank averaging**, a copula-style summary that is
-invariant to monotone transformations of either distance.
+have different sensitivities.  The ensemble combines them via one of
+two methods chosen with the `method` argument.
 
-For an $n \times n$ distance matrix $D$, let $U$ be the set of
-$\binom{n}{2}$ unordered upper-triangular entries.  Assign fractional
-ranks:
+### `method = "original"` (default)
 
-$$
-r(D)_{ik} = \frac{\text{rank of } D_{ik} \text{ among } U}
-                 {|U| + 1}
-$$
+Reproduces the published `run.r` workflow verbatim:
 
-so that $r(D)_{ik} \in (0, 1)$.  The ensemble entry is:
+1. **Reverse** the Bayesian direction: $D_B' = 2 - D_B$ so that both
+   matrices are divergence-oriented (larger = more dissimilar).
+2. **Min-max normalise** each matrix over **all** entries (diagonal,
+   upper and lower triangles together) to $[0, 1]$.
+3. Let $H$ be the normalised heuristic and $B$ the reversed-
+   normalised Bayesian matrix.  Sort $B$'s values and map them onto
+   the rank-order of $H$:
+   $$
+   D_{ik}^{(E)} = B_{(\text{rank}(H_{ik}))}
+   $$
+   where ties in $H$ are broken **randomly** (`ties.method =
+   "random"`), making the output **non-deterministic** unless a
+   `seed` is provided.
+4. Take the elementwise mean of the distribution-mapped matrix and
+   $H$, then rescale by the global maximum.
 
-$$
-D_{ik}^{(E)} = \frac{r\bigl(D^{(H)}\bigr)_{ik} +
-                    r\bigl(D^{(B)}\bigr)_{ik}}{2}
-$$
+Because ties in the heuristic ranking are resolved at random, two
+calls with the same data can produce different matrices.  The output
+matrix can also be **asymmetric** (the random tie-breaking and the
+full-matrix (non-triangular) sorting do not guarantee symmetry).
 
-Values near 0 indicate both methods agree on high similarity; values
-near 1 indicate strong divergence.
+### `method = "rank"`
+
+A package-specific variant that avoids random tie-breaking and
+preserves symmetry:
+
+1. **Reverse** the Bayesian direction: $D_B' = 2 - D_B$, so both
+   matrices are divergence-oriented.
+2. For an $n \times n$ distance matrix $D$, let $U$ be the set of
+   $\binom{n}{2}$ strictly upper-triangular entries.  Assign
+   fractional ranks:
+   $$
+   r(D)_{ik} = \frac{\text{rank of } D_{ik} \text{ among } U}
+                    {\binom{n}{2} + 1}
+   $$
+   with ties resolved by `ties.method = "average"`.  The diagonal
+   is set to `NA`.
+3. The ensemble entry is:
+   $$
+   D_{ik}^{(E)} = \frac{r(D_H)_{ik} + r(D_B')_{ik}}{2}
+   $$
+
+### Interpretation
+
+After reversal both components are divergence-oriented:
+
+- Values near **0** indicate both methods agree on high similarity
+  (low divergence).
+- Values near **1** indicate agreement on strong divergence.
+
+For the `"rank"` method the output lies in $(0, 1)$; for `"original"`
+the range depends on the global min-max scaling.  The `"rank"` method
+is a package variant and is **not** described in the original
+publication.
 
 ## References
 
-Barratt JLN, Plucinski M, Nascimento F, et al. (2019)
-"A Genotyping Approach to Determine the Geographic Origin and
-Relatedness of Cyclospora cayetanensis"
-*Parasitology*, doi:10.1017/S0031182019000581.
+Barratt JLN, Park S, Nascimento FS, et al. (2019) "Genotyping
+genetically heterogeneous *Cyclospora cayetanensis* infections to
+complement epidemiological case linkage".  *Parasitology*
+**146**:1275--1283.  doi:10.1017/S0031182019000581.
+
+Component distances (heuristic and Bayesian) verified against the
+original R scripts to within $10^{-10}$ on a 68-sample fixture.
+The ensemble `"rank"` method is a package-level extension.
