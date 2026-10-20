@@ -3,7 +3,7 @@
 
 #' Internal heuristic distance (C++ implementation)
 #'
-#' RcppParallel reimplementation of \\code{euk_heuristic_distance_r()}.
+#' RcppParallel reimplementation of \code{euk_heuristic_distance_r()}.
 #' Each locus may have at most 64 distinct alleles.
 #'
 #' @param geno List of integer matrices.

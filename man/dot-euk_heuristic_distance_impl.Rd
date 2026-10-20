@@ -20,6 +20,6 @@ missing-locus imputation.}
 A symmetric distance matrix.
 }
 \description{
-RcppParallel reimplementation of \\code{euk_heuristic_distance_r()}.
+RcppParallel reimplementation of \code{euk_heuristic_distance_r()}.
 Each locus may have at most 64 distinct alleles.
 }

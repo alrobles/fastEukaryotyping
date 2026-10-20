@@ -147,7 +147,7 @@ euk_heuristic_distance <- function(geno, ploidy, ids = NULL, m = rep(1L, length(
 #' @param epsilon Rate of missed alleles (default `0.3072`).
 #' @param use_r Logical. If `TRUE` use the pure-R reference implementation
 #'   (deprecated); if `FALSE` (default) use the optimised C++ implementation.
-#' @return An `n x n` numeric distance matrix in \\eqn{[0, 2]}.
+#' @return An `n x n` numeric distance matrix in \eqn{[0, 2]}.
 #' @export
 #' @examples
 #' set.seed(42)
@@ -188,23 +188,42 @@ euk_bayesian_distance <- function(geno, ploidy, ids = NULL,
 
 #' Eukaryotyping ensemble distance
 #'
-#' Rank-mapped mean of the heuristic and Bayesian distances, following
-#' Barratt et al. (2019): each matrix is converted to fractional ranks over
-#' the unordered pairs and the ensemble entry is the mean of the two ranks.
+#' Combines the heuristic and Bayesian distance matrices into a single
+#' ensemble. Two rules are available: `"original"` (default) reproduces the
+#' distribution-mapping procedure of the original `run.r` script shipped
+#' with Barratt et al. (2019); `"rank"` is a package-specific
+#' direction-consistent fractional-rank mean.
 #'
 #' @param geno List of `n x maxMOI` integer matrices (one per locus).
 #' @param ploidy Integer vector (1 = haploid, 2 = diploid) for each locus.
 #' @param ids Optional character vector of sample identifiers.
+#' @param method Combination rule. `"original"` (default) reproduces the
+#'   combining procedure of the original `run.r` script: the Bayesian matrix
+#'   is reversed (`2 - D_bayesian`), both matrices are min-max normalised
+#'   over all entries including the diagonal, the sorted Bayesian values are
+#'   mapped onto the ranks of the heuristic matrix, the ensemble is the
+#'   elementwise mean of the mapped and heuristic matrices, rescaled by its
+#'   maximum. Random tie breaking makes this method non-deterministic
+#'   without `seed` and can yield a non-symmetric matrix. `"rank"` is a
+#'   package-specific fractional-rank mean over the strictly upper
+#'   triangle, with the Bayesian matrix reversed so both components are
+#'   divergence-oriented; its diagonal is `NA`.
+#' @param seed Optional integer seed for the `"original"` method's random
+#'   tie breaking. Ignored for `method = "rank"`.
 #' @param epsilon Rate of missed alleles for the Bayesian component.
 #' @param ... Passed to [euk_heuristic_distance()] (e.g. `m`, `impute_data`,
 #'   `use_r`).
-#' @return An `n x n` matrix of mean fractional ranks in \eqn{[0, 1]}.
+#' @return An `n x n` matrix of ensemble distances (in \eqn{[0, 1]} for
+#'   `method = "rank"` off-diagonal entries). Larger values indicate pairs
+#'   that both components rank as more divergent.
 #' @export
 euk_ensemble_distance <- function(geno, ploidy, ids = NULL,
-                                  epsilon = 0.3072, ...) {
+                                  method = c("original", "rank"),
+                                  seed = NULL, epsilon = 0.3072, ...) {
+  method <- match.arg(method)
   Dh <- euk_heuristic_distance(geno, ploidy, ids = NULL, ...)
   Db <- euk_bayesian_distance(geno, ploidy, ids = NULL, epsilon = epsilon)
-  D <- euk_ensemble_distance_r(Dh, Db)
+  D <- euk_ensemble_distance_r(Dh, Db, method = method, seed = seed)
   if (!is.null(ids)) {
     rownames(D) <- ids
     colnames(D) <- ids

@@ -26,7 +26,7 @@ empty slots.}
 (deprecated); if `FALSE` (default) use the optimised C++ implementation.}
 }
 \value{
-An `n x n` numeric distance matrix in \\eqn{[0, 2]}.
+An `n x n` numeric distance matrix in \eqn{[0, 2]}.
 }
 \description{
 Computes Plucinski's unsupervised naive-Bayes distance matrix for MLST

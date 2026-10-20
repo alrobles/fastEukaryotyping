@@ -45,10 +45,21 @@ test_that("identical samples score higher similarity than divergent ones", {
   expect_true(D[1, 1] >= D[1, 2])
 })
 
-test_that("euk_ensemble_distance returns rank means in [0, 1]", {
+test_that("euk_ensemble_distance rank method returns means in [0, 1]", {
   eg <- example_eukaryotyping
-  D <- euk_ensemble_distance(eg$geno, eg$ploidy, ids = eg$ids)
+  D <- euk_ensemble_distance(eg$geno, eg$ploidy, ids = eg$ids,
+                             method = "rank")
   expect_true(isSymmetric(unname(D), tol = TOL))
   off <- D[upper.tri(D)]
   expect_true(all(off >= 0 & off <= 1, na.rm = TRUE))
+})
+
+test_that("original method may be asymmetric (random ties, as in run.r)", {
+  # documented quirk of the original procedure, not a bug: rank() with
+  # ties.method = "random" gives H[i,j] and H[j,i] different ranks
+  eg <- example_eukaryotyping
+  D <- euk_ensemble_distance(eg$geno, eg$ploidy, method = "original",
+                             seed = 42)
+  expect_true(is.matrix(D))
+  expect_true(all(D >= 0 & D <= 1))
 })

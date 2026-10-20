@@ -28,8 +28,9 @@
 #'   2 = diploid.
 #' @param epsilon Rate of missed alleles. Default `0.3072`, the value estimated
 #'   by Joel Barratt (May 2019) in the original script.
-#' @return An `n x n` distance matrix with values in \eqn{[0, 2]}; `NA` where a
-#'   pair shares no comparable locus.
+#' @return An `n x n` distance matrix with values in \eqn{[0, 2]}; a pair
+#'   sharing no comparable locus returns exactly 1 (uniform posterior), as in
+#'   the original script's `colSums(na.rm = TRUE)` convention.
 #' @importFrom utils combn
 #' @keywords internal
 #' @noRd
@@ -124,26 +125,60 @@ euk_bayesian_distance_r <- function(geno, ploidy, epsilon = 0.3072) {
 }
 
 
-#' Eukaryotyping ensemble distance --- pure R reference
+#' Eukaryotyping ensemble distance --- pure R engine
 #'
-#' \strong{Deprecated:} use \code{\link{euk_ensemble_distance}} which
-#' calls the C++ backends by default. This reference helper is retained
-#' for cross-validation and development only.
+#' Internal engine behind \code{\link{euk_ensemble_distance}}. Two
+#' combination rules are provided.
 #'
-#' Rank-mapped mean of the heuristic and Bayesian distance matrices: the
-#' pairwise distances of each method are converted to fractional ranks over
-#' the unique unordered pairs, and the ensemble entry is the mean of the two
-#' ranks. Equivalent to a copula-style average that is invariant to monotone
-#' transformations of either distance.
+#' `method = "original"` is a verbatim port of the combining procedure in the
+#' original `run.r` script: the Bayesian matrix is reversed (\eqn{2 - D_B}),
+#' both matrices are min-max normalised over all entries (diagonal and both
+#' triangles included), the sorted normalised Bayesian values are mapped onto
+#' the ranks of the normalised heuristic matrix with random tie breaking, the
+#' ensemble is the elementwise mean of that mapped matrix and the normalised
+#' heuristic matrix, and the result is divided by its maximum. Random tie
+#' breaking makes the original procedure non-deterministic and can produce a
+#' non-symmetric matrix; pass `seed` for reproducibility.
+#'
+#' `method = "rank"` is a package-specific direction-consistent variant: each
+#' matrix's strictly upper-triangular entries are converted to fractional
+#' ranks (average ties, denominator `choose(n, 2) + 1`, missing pairs kept
+#' `NA`), with the Bayesian matrix first reversed as `2 - D_bayesian` so that
+#' both components are divergence-oriented. The ensemble entry is the mean of
+#' the two fractional ranks; the diagonal is `NA`. Invariant to strictly
+#' increasing transformations that preserve ties and missingness.
 #'
 #' @param D_heuristic `n x n` heuristic distance matrix.
 #' @param D_bayesian `n x n` Bayesian distance matrix (same dimnames).
-#' @return `n x n` numeric matrix of mean fractional ranks in \eqn{[0, 1]}.
+#' @param method `"original"` (default) or `"rank"`.
+#' @param seed Optional integer; `set.seed(seed)` is called before the
+#'   original method's random tie breaking. Ignored for `"rank"`.
+#' @return `n x n` numeric matrix of ensemble distances.
 #' @keywords internal
 #' @noRd
-#' @deprecated Use \code{\link{euk_ensemble_distance}} instead.
-euk_ensemble_distance_r <- function(D_heuristic, D_bayesian) {
-  message("DeprecationWarning: euk_ensemble_distance_r is deprecated. Use euk_ensemble_distance instead.")
+euk_ensemble_distance_r <- function(D_heuristic, D_bayesian,
+                                  method = c("original", "rank"),
+                                  seed = NULL) {
+  method <- match.arg(method)
+
+  if (method == "original") {
+    # verbatim port of Joel-Barratt/Eukaryotyping run.r lines 15-37
+    B_temp <- 2 - D_bayesian
+    B_temp <- B_temp - min(B_temp)
+    B_norm <- B_temp / max(B_temp)
+    H_temp <- D_heuristic - min(D_heuristic, na.rm = TRUE)
+    H_norm <- H_temp / max(H_temp, na.rm = TRUE)
+    if (!is.null(seed)) set.seed(seed)
+    D <- sort(B_norm)[rank(H_norm, ties.method = "random")]
+    arr <- array(NA, dim = c(nrow(D_heuristic), ncol(D_heuristic), 2))
+    arr[, , 1] <- D
+    arr[, , 2] <- H_norm
+    out <- apply(arr, c(1, 2), function(x) mean(x, na.rm = TRUE))
+    out <- out / max(out)
+    dimnames(out) <- dimnames(D_heuristic)
+    return(out)
+  }
+
   rank_upper <- function(D) {
     iu <- which(upper.tri(D), arr.ind = TRUE)
     r <- rank(D[iu], ties.method = "average", na.last = "keep")
@@ -152,5 +187,7 @@ euk_ensemble_distance_r <- function(D_heuristic, D_bayesian) {
     out[cbind(iu[, 2L], iu[, 1L])] <- r
     out / (length(r) + 1)
   }
-  (rank_upper(D_heuristic) + rank_upper(D_bayesian)) / 2
+  # 2 - D_bayesian: reverse the similarity direction so both components
+  # rank divergence in the same direction
+  (rank_upper(D_heuristic) + rank_upper(2 - D_bayesian)) / 2
 }

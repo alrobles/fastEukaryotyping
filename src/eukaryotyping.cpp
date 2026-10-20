@@ -311,7 +311,7 @@ static void impute_pass(const std::vector<LocusData>& loci,
 
 //' Internal heuristic distance (C++ implementation)
 //'
-//' RcppParallel reimplementation of \\code{euk_heuristic_distance_r()}.
+//' RcppParallel reimplementation of \code{euk_heuristic_distance_r()}.
 //' Each locus may have at most 64 distinct alleles.
 //'
 //' @param geno List of integer matrices.
@@ -594,7 +594,9 @@ struct BayesWorker : public Worker {
         s0 += ll[0]; s1 += ll[1]; s2 += ll[2];
         any_locus = true;
       }
-      if (!any_locus) { out(i, k) = NA_REAL; out(k, i) = NA_REAL; continue; }
+      // Match the R/original convention: colSums over an all-missing pair
+      // yields c(0,0,0) -> uniform posterior -> distance exactly 1.0.
+      if (!any_locus) { out(i, k) = out(k, i) = 1.0; continue; }
       double e0 = std::exp(s0), e1 = std::exp(s1), e2 = std::exp(s2);
       double den = e0 + e1 + e2;
       out(i, k) = out(k, i) = (e1 + 2.0 * e2) / den;
@@ -673,7 +675,7 @@ NumericMatrix euk_bayesian_distance_impl(List geno, IntegerVector ploidy, double
       s0 += ll[0]; s1 += ll[1]; s2 += ll[2];
       any_locus = true;
     }
-    if (!any_locus) { D(i, i) = NA_REAL; }
+    if (!any_locus) { D(i, i) = 1.0; }  // uniform posterior, as in R/original
     else {
       double e0 = std::exp(s0), e1 = std::exp(s1), e2 = std::exp(s2);
       D(i, i) = (e1 + 2.0 * e2) / (e0 + e1 + e2);

@@ -29,9 +29,25 @@
 - `use_r = FALSE` is now the default; the C++ backend is the primary
   implementation path. `use_r = TRUE` emits a deprecation warning.
 - Pure-R reference functions (`euk_heuristic_distance_r`,
-  `euk_bayesian_distance_r`, `euk_ensemble_distance_r`) are marked
-  deprecated and emit a deprecation warning when called. They remain
-  available for cross-validation and development.
+  `euk_bayesian_distance_r`) are marked deprecated and emit a deprecation
+  warning when called. They remain available for cross-validation and
+  development. `euk_ensemble_distance_r` is NOT deprecated: it is the
+  internal engine behind `euk_ensemble_distance` (no C++ equivalent).
+
+### Ensemble and Bayesian edge-case fixes (algorithm-page review)
+
+- `euk_ensemble_distance()` gains `method`: `"original"` (default)
+  reproduces the `run.r` distribution-mapping ensemble verbatim (2-B,
+  min-max normalisation, sorted Bayesian values mapped onto heuristic
+  ranks, random tie breaking controllable via `seed`). `"rank"` is a
+  direction-consistent fractional-rank mean that ranks `2 - D_bayesian`
+  so both components are divergence-oriented. The previous undirected
+  rank mean (which cancelled anti-correlated inputs to ~0.5) is replaced.
+- Bayesian C++ backend now returns 1.0 (uniform posterior) for pairs with
+  no comparable locus, matching the R and original-script convention;
+  previously it returned `NA` (diagonal included).
+- New tests cover `run.r` ensemble equivalence, seed determinism,
+  rank-direction ordering, and no-comparable-locus backend parity.
 
 ### CRAN and documentation
 
