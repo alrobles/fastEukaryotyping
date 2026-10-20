@@ -42,7 +42,7 @@ euk_bayesian_distance(
 
 ## Value
 
-An \`n x n\` numeric distance matrix in \eqn\[0, 2\].
+An \`n x n\` numeric distance matrix in \\\[0, 2\]\\.
 
 ## Examples
 

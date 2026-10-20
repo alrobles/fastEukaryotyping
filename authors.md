@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/alrobles/fasteukaryotyping/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/alrobles/fastEukaryotyping/blob/main/inst/CITATION)
 
 Robles Fernandez A (2026). *fasteukaryotyping: Fast C++ Eukaryotyping
 MLST Distance Ensemble*. R package version 0.1.0,

@@ -43,7 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alrobles/fasteukaryotyping/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alrobles/fastEukaryotyping/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -62,7 +62,7 @@
 Robles Fernández</h4>
             <address class="author_afil">
       Department of Ecology and Evolutionary Biology and Center for
-Ecological Research, University of Kansas<br><small class="dont-index">Source: <a href="https://github.com/alrobles/fasteukaryotyping/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
+Ecological Research, University of Kansas<br><small class="dont-index">Source: <a href="https://github.com/alrobles/fastEukaryotyping/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
     </address>
 </div>
@@ -81,7 +81,7 @@ question is: <em>how genetically similar are any two samples?</em></p>
 described by Barratt et al. (2019) (<a href="doi:10.1017/S0031182019000581" class="uri">doi:10.1017/S0031182019000581</a>) for computing pairwise
 genetic distances from MLST haplotype data sheets (HDS).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/alrobles/fasteukaryotyping" class="external-link">fasteukaryotyping</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/alrobles/fastEukaryotyping" class="external-link">fasteukaryotyping</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="the-three-distance-methods">The three distance methods<a class="anchor" aria-label="anchor" href="#the-three-distance-methods"></a>
@@ -198,7 +198,7 @@ example:</p>
 <span>  <span class="va">d_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/euk_heuristic_distance.html">euk_heuristic_distance</a></span><span class="op">(</span><span class="va">eg</span><span class="op">$</span><span class="va">geno</span>, <span class="va">eg</span><span class="op">$</span><span class="va">ploidy</span>, use_r <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    user  system elapsed </span></span>
-<span><span class="co">##    0.02    0.00    0.02</span></span></code></pre>
+<span><span class="co">##   0.011   0.001   0.010</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">d_cpp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/euk_heuristic_distance.html">euk_heuristic_distance</a></span><span class="op">(</span><span class="va">eg</span><span class="op">$</span><span class="va">geno</span>, <span class="va">eg</span><span class="op">$</span><span class="va">ploidy</span>, use_r <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>

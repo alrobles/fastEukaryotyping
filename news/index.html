@@ -26,7 +26,7 @@
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alrobles/fasteukaryotyping/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alrobles/fastEukaryotyping/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/alrobles/fasteukaryotyping/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/alrobles/fastEukaryotyping/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
@@ -61,7 +61,14 @@
 <ul><li>Internal C++ functions renamed from <code>.euk_*_distance_cpp</code> to <code>.euk_*_distance_impl</code> (the <code>_cpp</code> suffix is no longer part of the release API).</li>
 <li>
 <code>use_r = FALSE</code> is now the default; the C++ backend is the primary implementation path. <code>use_r = TRUE</code> emits a deprecation warning.</li>
-<li>Pure-R reference functions (<code>euk_heuristic_distance_r</code>, <code>euk_bayesian_distance_r</code>, <code>euk_ensemble_distance_r</code>) are marked deprecated and emit a deprecation warning when called. They remain available for cross-validation and development.</li>
+<li>Pure-R reference functions (<code>euk_heuristic_distance_r</code>, <code>euk_bayesian_distance_r</code>) are marked deprecated and emit a deprecation warning when called. They remain available for cross-validation and development. <code>euk_ensemble_distance_r</code> is NOT deprecated: it is the internal engine behind <code>euk_ensemble_distance</code> (no C++ equivalent).</li>
+</ul></div>
+<div class="section level4">
+<h4 id="ensemble-and-bayesian-edge-case-fixes-algorithm-page-review-0-1-0">Ensemble and Bayesian edge-case fixes (algorithm-page review)<a class="anchor" aria-label="anchor" href="#ensemble-and-bayesian-edge-case-fixes-algorithm-page-review-0-1-0"></a></h4>
+<ul><li>
+<code><a href="../reference/euk_ensemble_distance.html">euk_ensemble_distance()</a></code> gains <code>method</code>: <code>"original"</code> (default) reproduces the <code>run.r</code> distribution-mapping ensemble verbatim (2-B, min-max normalisation, sorted Bayesian values mapped onto heuristic ranks, random tie breaking controllable via <code>seed</code>). <code>"rank"</code> is a direction-consistent fractional-rank mean that ranks <code>2 - D_bayesian</code> so both components are divergence-oriented. The previous undirected rank mean (which cancelled anti-correlated inputs to ~0.5) is replaced.</li>
+<li>Bayesian C++ backend now returns 1.0 (uniform posterior) for pairs with no comparable locus, matching the R and original-script convention; previously it returned <code>NA</code> (diagonal included).</li>
+<li>New tests cover <code>run.r</code> ensemble equivalence, seed determinism, rank-direction ordering, and no-comparable-locus backend parity.</li>
 </ul></div>
 <div class="section level4">
 <h4 id="cran-and-documentation-0-1-0">CRAN and documentation<a class="anchor" aria-label="anchor" href="#cran-and-documentation-0-1-0"></a></h4>

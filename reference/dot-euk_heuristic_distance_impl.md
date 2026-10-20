@@ -1,6 +1,6 @@
 # Internal heuristic distance (C++ implementation)
 
-RcppParallel reimplementation of \codeeuk_heuristic_distance_r(). Each
+RcppParallel reimplementation of `euk_heuristic_distance_r()`. Each
 locus may have at most 64 distinct alleles.
 
 ## Usage

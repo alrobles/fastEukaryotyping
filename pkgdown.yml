@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   algorithm: algorithm.html
   introduction: introduction.html
-last_built: 2026-10-19T12:48Z
+last_built: 2026-10-20T02:50Z
 urls:
   reference: https://alrobles.github.io/fastEukaryotyping/reference
   article: https://alrobles.github.io/fastEukaryotyping/articles
